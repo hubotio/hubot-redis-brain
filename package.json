@@ -1,29 +1,23 @@
 {
   "name": "hubot-redis-brain",
   "description": "A hubot script to persist hubot's brain using redis",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "author": "Josh Nichols <technicalpickles@github.com>",
   "license": "MIT",
-
   "keywords": "hubot, hubot-scripts",
-
   "repository": {
     "type": "git",
     "url": "git://github.com/hubot-scripts/hubot-redis-brain.git"
   },
-
   "bugs": {
     "url": "https://github.com/hubot-scripts/hubot-redis-brain/issues"
   },
-
   "dependencies": {
     "redis": "0.8.4"
   },
-
   "peerDependencies": {
     "hubot": "2.x"
   },
-
   "devDependencies": {
     "hubot": "2.x",
     "mocha": "*",
@@ -35,9 +29,7 @@
     "matchdep": "~0.1.2",
     "grunt-contrib-watch": "~0.5.3"
   },
-
   "main": "index.coffee",
-
   "scripts": {
     "test": "grunt test"
   }
