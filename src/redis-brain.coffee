@@ -35,8 +35,8 @@ module.exports = (robot) ->
 
 
   info   = Url.parse  redisUrl, true
-  client = Redis.createClient(info.port, info.hostname)
-  prefix = info.path?.replace('/', '') or 'hubot'
+  client = if info.hostname == '' then Redis.createClient(info.pathname) else Redis.createClient(info.port, info.hostname)
+  prefix = if info.hostname == '' then 'hubot' else info.path?.replace('/', '')
 
   robot.brain.setAutoSave false
 
