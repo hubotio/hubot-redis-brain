@@ -30,9 +30,11 @@ The following attributes can be set using the `REDIS_URL`
 * port
 * key prefix
 
-For example, `export REDIS_URL=redis://:passwd@192.168.0.1:16379/prefix` would
-authenticate with `password`, connecting to 192.168.0.1 on port 16379, and store
+For example, `export REDIS_URL=redis://:password@192.168.0.1:16379/prefix` would
+authenticate with `password`, connecting to `192.168.0.1` on port `16379`, and store
 data using the `prefix:storage` key.
+
+For a UNIX domain socket, `export REDIS_URL=redis://:password@/var/run/redis.sock?prefix` would authenticate with `password`, connecting to `/var/run/redis.sock`, and store data using the `prefix:storage` key.
 
 ### Installing your own
 
