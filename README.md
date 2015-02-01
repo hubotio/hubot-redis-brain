@@ -57,7 +57,7 @@ Redis Cloud or Redis To Go addon to have automatically configure itself to use i
 * [Redis Cloud](https://addons.heroku.com/rediscloud)
 * [Redis To Go](https://addons.heroku.com/redistogo)
 
-## Cloud Foundry
+### Cloud Foundry
 
 For deployment on Cloud Foundry, the Redis information can be automatically retrieved from 
 the VCAP_SERVICES environment variable.  To enable this, set `HUBOT_REDIS_CF=my_redis_service`
