@@ -29,13 +29,13 @@ module.exports = (robot) ->
                'redis://localhost:6379'
 
   if redisUrlEnv?
-    robot.logger.info "Discovered redis from #{redisUrlEnv} environment variable"
+    robot.logger.info "hubot-redis-brain: Discovered redis from #{redisUrlEnv} environment variable"
   else
-    robot.logger.info "Using default redis on localhost:6379"
+    robot.logger.info "hubot-redis-brain: Using default redis on localhost:6379"
 
 
-  info   = Url.parse  redisUrl, true
-  client = Redis.createClient(info.port, info.hostname)
+  info   = Url.parse redisUrl, true
+  client = if info.auth then Redis.createClient(info.port, info.hostname, {no_ready_check: true}) else Redis.createClient(info.port, info.hostname)
   prefix = info.path?.replace('/', '') or 'hubot'
 
   robot.brain.setAutoSave false
@@ -45,10 +45,10 @@ module.exports = (robot) ->
       if err
         throw err
       else if reply
-        robot.logger.info "Data for #{prefix} brain retrieved from Redis"
+        robot.logger.info "hubot-redis-brain: Data for #{prefix} brain retrieved from Redis"
         robot.brain.mergeData JSON.parse(reply.toString())
       else
-        robot.logger.info "Initializing new data for #{prefix} brain"
+        robot.logger.info "hubot-redis-brain: Initializing new data for #{prefix} brain"
         robot.brain.mergeData {}
 
       robot.brain.setAutoSave true
@@ -56,9 +56,9 @@ module.exports = (robot) ->
   if info.auth
     client.auth info.auth.split(":")[1], (err) ->
       if err
-        robot.logger.error "Failed to authenticate to Redis"
+        robot.logger.error "hubot-redis-brain: Failed to authenticate to Redis"
       else
-        robot.logger.info "Successfully authenticated to Redis"
+        robot.logger.info "hubot-redis-brain: Successfully authenticated to Redis"
         getData()
 
   client.on "error", (err) ->
@@ -68,7 +68,7 @@ module.exports = (robot) ->
       robot.logger.error err.stack
 
   client.on "connect", ->
-    robot.logger.debug "Successfully connected to Redis"
+    robot.logger.debug "hubot-redis-brain: Successfully connected to Redis"
     getData() if not info.auth
 
   robot.brain.on 'save', (data = {}) ->
