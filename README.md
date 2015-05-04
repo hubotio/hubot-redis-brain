@@ -45,7 +45,7 @@ run your own, most package managers have a package for redis:
 
 ### Boxen
 
-If you are using [boxen](https://boxen.github.com/) to manage your enviromemnt,
+If you are using [boxen](https://boxen.github.com/) to manage your environment,
 hubot-redis-brain will automatically use the boxen-managed redis (ie by using `BOXEN_REDIS_URL`).
 
 
