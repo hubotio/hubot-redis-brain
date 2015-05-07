@@ -11,8 +11,12 @@
 
 Url   = require "url"
 Redis = require "redis"
+util  = require 'util'
 
 module.exports = (robot) ->
+
+  redisDef = 'redis://localhost:6379'
+
   redisUrl = if process.env.REDISTOGO_URL?
                redisUrlEnv = "REDISTOGO_URL"
                process.env.REDISTOGO_URL
@@ -25,8 +29,23 @@ module.exports = (robot) ->
              else if process.env.REDIS_URL?
                redisUrlEnv = "REDIS_URL"
                process.env.REDIS_URL
+             else if process.env.HUBOT_REDIS_CF?
+               cfenv = require "cfenv"
+               cfredis = cfenv.getAppEnv(name='p-redis')
+               cfcreds = cfredis.getServiceCreds(name=process.env.HUBOT_REDIS_CF)
+               if cfcreds?
+                 cfRedisUrl = util.format("redis://%s:%s@%s:%s/%s", 
+                                          robot.name,
+                                          cfcreds.password,
+                                          cfcreds.host,
+                                          cfcreds.port,
+                                          robot.name)
+                 redisUrlEnv = 'VCAP_SERVICES'
+                 cfRedisUrl
+               else
+                 redisDef
              else
-               'redis://localhost:6379'
+                redisDef
 
   if redisUrlEnv?
     robot.logger.info "Discovered redis from #{redisUrlEnv} environment variable"
@@ -55,7 +74,7 @@ module.exports = (robot) ->
 
   if info.auth
     client.auth info.auth.split(":")[1], (err) ->
-      if err
+      if err 
         robot.logger.error "Failed to authenticate to Redis"
       else
         robot.logger.info "Successfully authenticated to Redis"

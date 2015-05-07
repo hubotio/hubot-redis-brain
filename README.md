@@ -57,6 +57,22 @@ Redis Cloud or Redis To Go addon to have automatically configure itself to use i
 * [Redis Cloud](https://addons.heroku.com/rediscloud)
 * [Redis To Go](https://addons.heroku.com/redistogo)
 
+### Cloud Foundry
+
+For deployment on Cloud Foundry, the Redis information can be automatically retrieved from 
+the VCAP_SERVICES environment variable.  To enable this, set `HUBOT_REDIS_CF=my_redis_service`
+Where 'my_redis_service' is the name of the CF Redis service to which your bot app is bound.
+
+This can be added to your deployment manifest.yml:
+
+```
+env:
+  HUBOT_REDIS_CF: my_redis_service
+```
+
+CF support requires the 'cfenv' package
+
+`npm install cfenv --save`
 
 Other redis addons would need to be configured using `REDIS_URL` until support
 is added to hubot-redis-brain (or hubot-redis-brain needs to be updated to look
