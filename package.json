@@ -13,7 +13,7 @@
     "url": "https://github.com/hubot-scripts/hubot-redis-brain/issues"
   },
   "dependencies": {
-    "redis": "0.8.4"
+    "redis": "~2.4.2"
   },
   "peerDependencies": {
     "hubot": "2.x"
