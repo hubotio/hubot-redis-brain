@@ -1,7 +1,7 @@
 {
   "name": "hubot-redis-brain-docker",
   "description": "A hubot script to persist hubot's brain using redis in docker",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Leonardo Gatica <lgatica@protonmail.com> (https://about.me/lgatica)",
   "license": "MIT",
   "keywords": "hubot, hubot-scripts",
