@@ -1,35 +1,35 @@
 {
-  "name": "hubot-redis-brain",
-  "description": "A hubot script to persist hubot's brain using redis",
-  "version": "0.0.3",
-  "author": "Josh Nichols <technicalpickles@github.com>",
+  "name": "hubot-redis-brain-docker",
+  "description": "A hubot script to persist hubot's brain using redis in docker",
+  "version": "0.0.4",
+  "author": "Leonardo Gatica <lgatica@protonmail.com> (https://about.me/lgatica)",
   "license": "MIT",
   "keywords": "hubot, hubot-scripts",
   "repository": {
     "type": "git",
-    "url": "git://github.com/hubot-scripts/hubot-redis-brain.git"
+    "url": "git://github.com/lgaticaq/hubot-redis-brain-docker.git"
   },
   "bugs": {
-    "url": "https://github.com/hubot-scripts/hubot-redis-brain/issues"
+    "url": "https://github.com/lgaticaq/hubot-redis-brain-docker/issues"
   },
   "dependencies": {
-    "redis": "0.8.4"
+    "redis": "2.6.0-1"
   },
   "peerDependencies": {
     "hubot": "2.x"
   },
   "devDependencies": {
-    "chai": "^2.1.1",
-    "coffee-script": "1.6.3",
-    "grunt": "^0.4.5",
-    "grunt-cli": "^0.1.13",
-    "grunt-contrib-watch": "~0.6.1",
+    "chai": "^3.5.0",
+    "coffee-script": "1.10.0",
+    "grunt": "^1.0.1",
+    "grunt-cli": "^1.2.0",
+    "grunt-contrib-watch": "~1.0.0",
     "grunt-mocha-test": "~0.12.7",
-    "grunt-release": "~0.11.0",
+    "grunt-release": "~0.13.0",
     "hubot": "2.x",
-    "matchdep": "~0.3.0",
+    "matchdep": "~1.0.1",
     "mocha": "^2.1.0",
-    "sinon": "^1.13.0",
+    "sinon": "^1.17.4",
     "sinon-chai": "^2.7.0"
   },
   "main": "index.coffee",
