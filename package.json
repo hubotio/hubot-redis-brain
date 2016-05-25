@@ -28,7 +28,7 @@
     "grunt-release": "~0.13.0",
     "hubot": "2.19.0",
     "matchdep": "~1.0.1",
-    "mocha": "^2.5.2",
+    "mocha": "^2.5.3",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.7.0"
   },
