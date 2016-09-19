@@ -29,7 +29,7 @@
     "hubot": "2.19.0",
     "matchdep": "~1.0.1",
     "mocha": "^3.0.2",
-    "sinon": "^1.17.5",
+    "sinon": "^1.17.6",
     "sinon-chai": "^2.7.0"
   },
   "main": "index.coffee",
