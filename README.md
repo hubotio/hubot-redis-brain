@@ -48,7 +48,6 @@ run your own, most package managers have a package for redis:
 If you are using [boxen](https://boxen.github.com/) to manage your environment,
 hubot-redis-brain will automatically use the boxen-managed redis (ie by using `BOXEN_REDIS_URL`).
 
-
 ### Heroku
 
 If you are deploying on [Heroku](https://www.heroku.com/), you can add the
@@ -61,3 +60,10 @@ Redis Cloud or Redis To Go addon to have automatically configure itself to use i
 Other redis addons would need to be configured using `REDIS_URL` until support
 is added to hubot-redis-brain (or hubot-redis-brain needs to be updated to look
   for the environment variable the service uses)
+
+### Redis Twemproxy
+
+If you are using [Twemproxy](https://github.com/twitter/twemproxy) to cluster redis,
+you need to turn off the redis ready check which uses the unsupported INFO cmd.
+
+`REDIS_NO_CHECK = 1`
