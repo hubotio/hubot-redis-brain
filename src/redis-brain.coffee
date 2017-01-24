@@ -2,7 +2,7 @@
 #   Persist hubot's brain to redis
 #
 # Configuration:
-#   REDISTOGO_URL or REDISCLOUD_URL or BOXEN_REDIS_URL or REDIS_URL.
+#   REDISTOGO_URL or REDISCLOUD_URL or BOXEN_REDIS_URL or REDIS_URL or REDIS_PORT_6379_TCP.
 #   URL format: redis://<host>:<port>[/<brain_prefix>]
 #   If not provided, '<brain_prefix>' will default to 'hubot'.
 #
@@ -25,6 +25,12 @@ module.exports = (robot) ->
              else if process.env.REDIS_URL?
                redisUrlEnv = "REDIS_URL"
                process.env.REDIS_URL
+             else if process.env.REDIS_PORT_6379_TCP_ADDR? and process.env.REDIS_PORT_6379_TCP_PORT?
+               redisUrlEnv = "REDIS_PORT_6379_TCP"
+               "redis://#{process.env.REDIS_PORT_6379_TCP_ADDR}:#{process.env.REDIS_PORT_6379_TCP_PORT}"
+             else if process.env.REDIS_1_PORT_6379_TCP_ADDR? and process.env.REDIS_1_PORT_6379_TCP_PORT?
+               redisUrlEnv = "REDIS_PORT_6379_TCP"
+               "redis://#{process.env.REDIS_1_PORT_6379_TCP_ADDR}:#{process.env.REDIS_1_PORT_6379_TCP_PORT}"
              else
                'redis://localhost:6379'
 
