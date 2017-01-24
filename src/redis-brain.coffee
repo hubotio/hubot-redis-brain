@@ -43,7 +43,6 @@ module.exports = (robot) ->
 
   info   = Url.parse redisUrl, true
   client = if info.auth or redisNoCheck == 'Y'
-          then
             Redis.createClient(info.port, info.hostname, {no_ready_check: true})
           else
             Redis.createClient(info.port, info.hostname)
