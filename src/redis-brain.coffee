@@ -27,6 +27,9 @@ module.exports = (robot) ->
              else if process.env.REDIS_URL?
                redisUrlEnv = "REDIS_URL"
                process.env.REDIS_URL
+             else if process.env.BRAIN_PORT_6379_TCP_ADDR? && process.env.BRAIN_PORT_6379_TCP_PORT?
+               redisUrlEnv = "redis://BRAIN_PORT_6379_TCP_ADDR:BRAIN_PORT_6379_TCP_PORT"
+               "redis://" + process.env.BRAIN_PORT_6379_TCP_ADDR + ":" + process.env.BRAIN_PORT_6379_TCP_PORT
              else
                'redis://localhost:6379'
 
