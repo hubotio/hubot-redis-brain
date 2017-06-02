@@ -3,9 +3,10 @@
 #
 # Configuration:
 #   REDISTOGO_URL or REDISCLOUD_URL or BOXEN_REDIS_URL or REDIS_URL.
-#   URL format: redis://<host>:<port>[/<brain_prefix>]
-#   URL format (UNIX socket): redis://<socketpath>[?<brain_prefix>]
-#   If not provided, '<brain_prefix>' will default to 'hubot'.
+#     URL format: redis://<host>:<port>[/<brain_prefix>]
+#     URL format (UNIX socket): redis://<socketpath>[?<brain_prefix>]
+#     If not provided, '<brain_prefix>' will default to 'hubot'.
+#   REDIS_NO_CHECK - set this to avoid ready check (for exampel when using Twemproxy)
 #
 # Commands:
 #   None
@@ -29,17 +30,12 @@ module.exports = (robot) ->
              else
                'redis://localhost:6379'
 
-  redisNoCheck = if process.env.REDIS_NO_CHECK?
-                   'Y'
-                 else
-                   'N'                   
-
   if redisUrlEnv?
     robot.logger.info "hubot-redis-brain: Discovered redis from #{redisUrlEnv} environment variable"
   else
     robot.logger.info "hubot-redis-brain: Using default redis on localhost:6379"
 
-  if redisNoCheck?
+  if process.env.REDIS_NO_CHECK?
     robot.logger.info "Turning off redis ready checks"
 
   info = Url.parse  redisUrl, true
@@ -47,7 +43,7 @@ module.exports = (robot) ->
     client = Redis.createClient(info.pathname)
     prefix = info.query?.toString() or 'hubot'
   else
-    client = if info.auth or redisNoCheck == 'Y'
+    client = if info.auth or process.env.REDIS_NO_CHECK?
               Redis.createClient(info.port, info.hostname, {no_ready_check: true})
             else
               Redis.createClient(info.port, info.hostname)
