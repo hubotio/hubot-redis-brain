@@ -4,6 +4,7 @@
 # Configuration:
 #   REDISTOGO_URL or REDISCLOUD_URL or BOXEN_REDIS_URL or REDIS_URL.
 #   URL format: redis://<host>:<port>[/<brain_prefix>]
+#   URL format (UNIX socket): redis://<socketpath>[?<brain_prefix>]
 #   If not provided, '<brain_prefix>' will default to 'hubot'.
 #
 # Commands:
@@ -34,9 +35,13 @@ module.exports = (robot) ->
     robot.logger.info "hubot-redis-brain: Using default redis on localhost:6379"
 
 
-  info   = Url.parse redisUrl, true
-  client = if info.auth then Redis.createClient(info.port, info.hostname, {no_ready_check: true}) else Redis.createClient(info.port, info.hostname)
-  prefix = info.path?.replace('/', '') or 'hubot'
+  info = Url.parse  redisUrl, true
+  if info.hostname == ''
+    client = Redis.createClient(info.pathname)
+    prefix = info.query?.toString() or 'hubot'
+  else
+    client = if info.auth then Redis.createClient(info.port, info.hostname, {no_ready_check: true}) else Redis.createClient(info.port, info.hostname)
+    prefix = info.path?.replace('/', '') or 'hubot'
 
   robot.brain.setAutoSave false
 
