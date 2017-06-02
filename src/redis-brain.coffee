@@ -29,18 +29,28 @@ module.exports = (robot) ->
              else
                'redis://localhost:6379'
 
+  redisNoCheck = if process.env.REDIS_NO_CHECK?
+                   'Y'
+                 else
+                   'N'                   
+
   if redisUrlEnv?
     robot.logger.info "hubot-redis-brain: Discovered redis from #{redisUrlEnv} environment variable"
   else
     robot.logger.info "hubot-redis-brain: Using default redis on localhost:6379"
 
+  if redisNoCheck?
+    robot.logger.info "Turning off redis ready checks"
 
   info = Url.parse  redisUrl, true
   if info.hostname == ''
     client = Redis.createClient(info.pathname)
     prefix = info.query?.toString() or 'hubot'
   else
-    client = if info.auth then Redis.createClient(info.port, info.hostname, {no_ready_check: true}) else Redis.createClient(info.port, info.hostname)
+    client = if info.auth or redisNoCheck == 'Y'
+              Redis.createClient(info.port, info.hostname, {no_ready_check: true})
+            else
+              Redis.createClient(info.port, info.hostname)
     prefix = info.path?.replace('/', '') or 'hubot'
 
   robot.brain.setAutoSave false
