@@ -1,7 +1,7 @@
 {
   "name": "hubot-redis-brain",
   "description": "A hubot script to persist hubot's brain using redis",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Josh Nichols <technicalpickles@github.com>",
   "license": "MIT",
   "keywords": "hubot, hubot-scripts",
