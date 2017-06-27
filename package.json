@@ -16,7 +16,7 @@
     "redis": "~2.6.x"
   },
   "peerDependencies": {
-    "hubot": ">=2 <10"
+    "hubot": ">=2 <10 || 0.0.0-development"
   },
   "devDependencies": {
     "chai": "^2.1.1",
