@@ -1,3 +1,5 @@
+'use strict'
+
 // Description:
 //   Persist hubot's brain to redis
 //
@@ -98,7 +100,12 @@ module.exports = function (robot) {
     if (!info.auth) { return getData() }
   })
 
-  robot.brain.on('save', (data = {}) => client.set(`${prefix}:storage`, JSON.stringify(data)))
+  robot.brain.on('save', (data) => {
+    if (!data) {
+      data = {}
+    }
+    client.set(`${prefix}:storage`, JSON.stringify(data))
+  })
 
   return robot.brain.on('close', () => client.quit())
 }
