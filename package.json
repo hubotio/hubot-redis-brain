@@ -25,14 +25,17 @@
     "grunt-contrib-watch": "~0.6.1",
     "grunt-mocha-test": "~0.12.7",
     "grunt-release": "~0.11.0",
-    "hubot": "2.x",
+    "hubot": "hubotio/hubot",
+    "hubot-mock-adapter-v3": "~1.0.0",
     "matchdep": "~0.3.0",
     "mocha": "^2.1.0",
     "sinon": "^1.13.0",
-    "sinon-chai": "^2.7.0"
+    "sinon-chai": "^2.7.0",
+    "standard": "^10.0.2"
   },
   "main": "index.js",
   "scripts": {
-    "test": "grunt test"
+    "pretest": "standard",
+    "test": "mocha"
   }
 }
