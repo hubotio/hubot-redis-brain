@@ -9,6 +9,9 @@
     "type": "git",
     "url": "git://github.com/hubot-scripts/hubot-redis-brain.git"
   },
+  "engines": {
+    "node" : ">4"
+  },
   "bugs": {
     "url": "https://github.com/hubot-scripts/hubot-redis-brain/issues"
   },
