@@ -1,6 +1,9 @@
 language: node_js
 node_js:
-  - "0.11"
-  - "0.10"
+  - "8"
+  - "6"
+  - "4"
 notifications:
   email: false
+sudo: false
+after_success: npm run coverage
