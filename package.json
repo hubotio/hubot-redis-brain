@@ -16,16 +16,17 @@
     "url": "https://github.com/hubot-scripts/hubot-redis-brain/issues"
   },
   "dependencies": {
-    "redis": "~2.6.x"
+    "redis": "^2.7.1"
   },
   "peerDependencies": {
     "hubot": ">=2 <10 || 0.0.0-development"
   },
   "devDependencies": {
     "chai": "^2.1.1",
-    "hubot": "hubotio/hubot",
-    "hubot-mock-adapter-v3": "~1.0.0",
-    "matchdep": "~0.3.0",
+    "coveralls": "^2.13.1",
+    "hubot": "^3.0.0",
+    "hubot-mock-adapter-v3": "^1.0.0",
+    "matchdep": "^0.3.0",
     "mocha": "^2.1.0",
     "nyc": "^11.0.3",
     "proxyquire": "^1.8.0",
@@ -36,6 +37,7 @@
   "main": "index.js",
   "scripts": {
     "pretest": "standard",
-    "test": "nyc mocha"
+    "test": "nyc --reporter=html --reporter=text mocha",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   }
 }
