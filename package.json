@@ -16,7 +16,7 @@
     "url": "https://github.com/hubotio/hubot-redis-brain.git"
   },
   "engines": {
-    "node": ">4"
+    "node": "> 4.0.0"
   },
   "bugs": {
     "url": "https://github.com/hubotio/hubot-redis-brain/issues"
