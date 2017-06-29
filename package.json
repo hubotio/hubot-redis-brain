@@ -1,39 +1,51 @@
 {
   "name": "hubot-redis-brain",
   "description": "A hubot script to persist hubot's brain using redis",
-  "version": "0.0.4",
+  "version": "0.0.0-development",
+  "publishConfig": {
+    "tag": "next"
+  },
   "author": "Josh Nichols <technicalpickles@github.com>",
   "license": "MIT",
-  "keywords": "hubot, hubot-scripts",
+  "keywords": [
+    "hubot",
+    "hubot-scripts"
+  ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/hubot-scripts/hubot-redis-brain.git"
+    "url": "https://github.com/hubotio/hubot-redis-brain.git"
+  },
+  "engines": {
+    "node": "> 4.0.0"
   },
   "bugs": {
-    "url": "https://github.com/hubot-scripts/hubot-redis-brain/issues"
+    "url": "https://github.com/hubotio/hubot-redis-brain/issues"
   },
   "dependencies": {
-    "redis": "~2.6.x"
+    "redis": "^2.7.1"
   },
   "peerDependencies": {
     "hubot": ">=2 <10 || 0.0.0-development"
   },
   "devDependencies": {
     "chai": "^2.1.1",
-    "coffee-script": "1.6.3",
-    "grunt": "^0.4.5",
-    "grunt-cli": "^0.1.13",
-    "grunt-contrib-watch": "~0.6.1",
-    "grunt-mocha-test": "~0.12.7",
-    "grunt-release": "~0.11.0",
-    "hubot": "2.x",
-    "matchdep": "~0.3.0",
+    "coveralls": "^2.13.1",
+    "hubot": "^3.0.0",
+    "hubot-mock-adapter-v3": "^1.0.0",
+    "matchdep": "^0.3.0",
     "mocha": "^2.1.0",
+    "nyc": "^11.0.3",
+    "proxyquire": "^1.8.0",
     "sinon": "^1.13.0",
-    "sinon-chai": "^2.7.0"
+    "sinon-chai": "^2.7.0",
+    "standard": "^10.0.2",
+    "semantic-release": "^6.3.6"
   },
-  "main": "index.coffee",
+  "main": "index.js",
   "scripts": {
-    "test": "grunt test"
+    "pretest": "standard",
+    "test": "nyc --reporter=html --reporter=text mocha",
+    "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   }
 }

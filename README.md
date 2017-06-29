@@ -1,8 +1,10 @@
+[![Build Status](https://travis-ci.org/hubotio/hubot-redis-brain.svg?branch=master)](https://travis-ci.org/hubotio/hubot-redis-brain) [![Coverage Status](https://coveralls.io/repos/github/hubotio/hubot-redis-brain/badge.svg?branch=master)](https://coveralls.io/github/hubotio/hubot-redis-brain?branch=master)
+
 # hubot-redis-brain
 
 A hubot script to persist hubot's brain using redis
 
-See [`src/redis-brain.coffee`](src/redis-brain.coffee) for full documentation.
+See [`src/redis-brain.js`](src/redis-brain.js) for full documentation.
 
 ## Installation
 
