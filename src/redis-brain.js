@@ -31,7 +31,7 @@ module.exports = function (robot) {
     robot.logger.info('Turning off redis ready checks')
   }
 
-  const info = Url.parse(redisUrl, true)
+  const info = Url.parse(redisUrl)
 
   if (info.hostname === '') {
     client = Redis.createClient(info.pathname)
