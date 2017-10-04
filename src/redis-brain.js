@@ -129,7 +129,12 @@ function getRedisEnv () {
 
 function buildCloudFoundryURL () {
   let host, hubotInstance
-  const services = JSON.parse(process.env.VCAP_SERVICES)
+  let services
+  try {
+    services = JSON.parse(process.env.VCAP_SERVICES)
+  } catch (e) {
+    services = process.env.VCAP_SERVICES
+  }
   const redisService = services[process.env.CF_REDIS_SERVICE]
   for (let instance of redisService) {
     if (instance['name'] === process.env.CF_REDIS_INSTANCE_NAME) {
