@@ -66,7 +66,7 @@ If you are deploying in a CloudFoundry environment, you can use any redis servic
 
 You'll need to set two environment variables in this case: 
 `CF_REDIS_SERVICE` - Your CloudFoundry's Redis Service name (ie. p-redis or rediscloud) 
-`CF_REDIS_INSTANCE_NAME` - The name you gave your serive instance. This will be used as the brain_prefix 
+`CF_REDIS_INSTANCE_NAME` - The name you gave your service instance. This will be used as the brain_prefix 
 
 ### Other
 

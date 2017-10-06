@@ -11,7 +11,7 @@
 //   REDIS_NO_CHECK - set this to avoid ready check (for exampel when using Twemproxy)
 //   # CloudFoundry Vars (Use the following vars only for running in CF)
 //   CF_REDIS_SERVICE - Your CloudFoundry's Redis Service name (ie. p-redis or rediscloud)
-//   CF_REDIS_INSTANCE_NAME = The name you gave your serive instance. This will be used as the brain_prefix
+//   CF_REDIS_INSTANCE_NAME = The name you gave your service instance. This will be used as the brain_prefix
 //
 // Commands:
 //   None
