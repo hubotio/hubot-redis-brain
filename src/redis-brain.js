@@ -136,11 +136,21 @@ function buildCloudFoundryURL () {
     services = process.env.VCAP_SERVICES
   }
   const redisService = services[process.env.CF_REDIS_SERVICE]
-  for (let instance of redisService) {
-    if (instance['name'] === process.env.CF_REDIS_INSTANCE_NAME) {
-      hubotInstance = instance
-      break
+  const instanceName = process.env.CF_REDIS_INSTANCE_NAME || none
+  if (instanceName){
+    for (let instance of redisService) {
+      if (instance['name'] === instanceName) {
+        hubotInstance = instance
+        break
+      }
     }
+    if (!hubotInstance) {
+      robot.logger.info('Could not find redis instance; reverting to localhost')
+      return 'redis://localhost:6379'
+    }
+  } else {
+    robot.logger.info('CF_REDIS_INSTANCE_NAME environment variable not set; reverting to localhost')
+    return 'redis://localhost:6379'
   }
   const redisCreds = hubotInstance['credentials']
   if (redisCreds['hostname'] === undefined) {
