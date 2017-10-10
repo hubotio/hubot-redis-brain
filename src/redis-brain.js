@@ -26,7 +26,7 @@ module.exports = function (robot) {
   if (redisUrlEnv) {
     if (redisUrlEnv === 'CF_REDIS_INSTANCE_NAME') {
       robot.logger.info(`hubot-redis-brain: Discovered redis from ${redisUrlEnv} environment variable. Pulling from VCAP`)
-      redisUrl = buildCloudFoundryURL()
+      redisUrl = buildCloudFoundryURL(robot)
     } else {
       robot.logger.info(`hubot-redis-brain: Discovered redis from ${redisUrlEnv} environment variable`)
       redisUrl = process.env[redisUrlEnv]
@@ -127,7 +127,7 @@ function getRedisEnv () {
   }
 }
 
-function buildCloudFoundryURL () {
+function buildCloudFoundryURL (robot) {
   let host, hubotInstance
   let services
   try {
@@ -136,8 +136,8 @@ function buildCloudFoundryURL () {
     services = process.env.VCAP_SERVICES
   }
   const redisService = services[process.env.CF_REDIS_SERVICE]
-  const instanceName = process.env.CF_REDIS_INSTANCE_NAME || none
-  if (instanceName){
+  const instanceName = process.env.CF_REDIS_INSTANCE_NAME || null
+  if (instanceName) {
     for (let instance of redisService) {
       if (instance['name'] === instanceName) {
         hubotInstance = instance
