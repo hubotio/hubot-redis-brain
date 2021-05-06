@@ -22,24 +22,24 @@
     "url": "https://github.com/hubotio/hubot-redis-brain/issues"
   },
   "dependencies": {
-    "redis": "^2.7.1"
+    "redis": "^3.1.2"
   },
   "peerDependencies": {
     "hubot": ">=2 <10 || 0.0.0-development"
   },
   "devDependencies": {
     "chai": "^2.1.1",
-    "coveralls": "^2.13.1",
+    "coveralls": "^3.1.0",
     "hubot": "^3.0.0",
     "hubot-mock-adapter-v3": "^1.0.0",
-    "matchdep": "^0.3.0",
-    "mocha": "^2.1.0",
-    "nyc": "^11.0.3",
+    "matchdep": "^2.0.0",
+    "mocha": "^8.3.2",
+    "nyc": "^15.1.0",
     "proxyquire": "^1.8.0",
+    "semantic-release": "^17.4.2",
     "sinon": "^1.13.0",
     "sinon-chai": "^2.7.0",
-    "standard": "^10.0.2",
-    "semantic-release": "^6.3.6"
+    "standard": "^10.0.2"
   },
   "main": "index.js",
   "scripts": {
