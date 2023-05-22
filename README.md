@@ -1,4 +1,6 @@
-[![Build Status](https://travis-ci.org/hubotio/hubot-redis-brain.svg?branch=master)](https://travis-ci.org/hubotio/hubot-redis-brain) [![Coverage Status](https://coveralls.io/repos/github/hubotio/hubot-redis-brain/badge.svg?branch=master)](https://coveralls.io/github/hubotio/hubot-redis-brain?branch=master)
+![Build Status](https://github.com/hubotio/hubot-redis-brain/actions/workflows/release.yml/badge.svg)
+
+[![Coverage Status](https://coveralls.io/repos/github/hubotio/hubot-redis-brain/badge.svg?branch=master)](https://coveralls.io/github/hubotio/hubot-redis-brain?branch=master)
 
 # hubot-redis-brain
 
