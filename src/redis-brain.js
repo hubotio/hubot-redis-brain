@@ -13,7 +13,7 @@
 // Commands:
 //   None
 
-const Url = require('url')
+const URL = require('url').URL
 const Redis = require('redis')
 
 module.exports = function (robot) {
@@ -31,15 +31,14 @@ module.exports = function (robot) {
     robot.logger.info('Turning off redis ready checks')
   }
 
-  const info = Url.parse(redisUrl)
-
+  const info = new URL(redisUrl)
   if (info.hostname === '') {
     client = Redis.createClient(info.pathname)
     prefix = (info.query ? info.query.toString() : undefined) || 'hubot'
   } else {
     client = (info.auth || process.env.REDIS_NO_CHECK)
-              ? Redis.createClient(info.port, info.hostname, {no_ready_check: true})
-            : Redis.createClient(info.port, info.hostname)
+      ? Redis.createClient(info.port, info.hostname, { no_ready_check: true })
+      : Redis.createClient(info.port, info.hostname)
     prefix = (info.path ? info.path.replace('/', '') : undefined) || 'hubot'
   }
 
@@ -74,9 +73,7 @@ module.exports = function (robot) {
   }
 
   client.on('error', function (err) {
-    if (/ECONNREFUSED/.test(err.message)) {
-
-    } else {
+    if (!/ECONNREFUSED/.test(err.message)) {
       robot.logger.error(err.stack)
     }
   })
