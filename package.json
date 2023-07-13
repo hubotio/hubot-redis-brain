@@ -24,8 +24,7 @@
   "main": "index.js",
   "scripts": {
     "pretest": "standard",
-    "test": "nyc --reporter=html --reporter=text mocha --exit",
-    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+    "test": "nyc --reporter=html --reporter=text mocha --exit"
   },
   "dependencies": {
     "redis": "^4.6.6",
@@ -40,5 +39,12 @@
     "semantic-release": "^21.0.2",
     "sinon": "^15.0.4",
     "sinon-chai": "^3.7.0"
+  },
+  "release": {
+    "branches": [
+      "main",
+      "next"
+    ],
+    "dryRun": false
   }
 }
