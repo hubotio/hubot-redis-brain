@@ -24,7 +24,9 @@
   "main": "index.js",
   "scripts": {
     "pretest": "standard",
-    "test": "nyc --reporter=html --reporter=text mocha --exit"
+    "test": "nyc --reporter=html --reporter=text mocha --exit",
+    "e2e": "mocha --exit test/e2e",
+    "standard": "standard"
   },
   "dependencies": {
     "redis": "^4.6.6",
