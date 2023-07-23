@@ -39,7 +39,7 @@ module.exports = function (robot) {
     client = (info.auth || process.env.REDIS_NO_CHECK)
       ? Redis.createClient(info.port, info.hostname, { no_ready_check: true })
       : Redis.createClient(info.port, info.hostname)
-    prefix = (info.path ? info.path.replace('/', '') : undefined) || 'hubot'
+    prefix = (info.pathname ? info.pathname.replace('/', '') : undefined) || 'hubot'
   }
 
   robot.brain.setAutoSave(false)
