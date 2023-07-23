@@ -6,6 +6,7 @@ permissions:
   contents: read
 jobs:
   build:
+    name: Build
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,6 +16,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -25,6 +28,7 @@ jobs:
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
   test:
+    name: Fast Tests
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -35,6 +39,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
@@ -45,7 +51,13 @@ jobs:
       - name: Test
         run: npm test
   e2e:
+    name: E2E Tests
     runs-on: ubuntu-latest
+    services:
+      redis:
+        image: redis
+        ports:
+          - 6379:6379
     permissions:
       contents: write
       issues: write
@@ -55,6 +67,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
