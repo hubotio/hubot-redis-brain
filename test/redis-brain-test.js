@@ -6,7 +6,6 @@ const shell = require('hubot/src/adapters/shell')
 const Adapter = require('hubot/src/adapter')
 const redisBrain = require('../src/redis-brain.js')
 const EventEmitter = require('events')
-const path = require('path')
 
 const chai = require('chai')
 const sinon = require('sinon')
@@ -18,9 +17,10 @@ const Robot = Hubot.Robot
 chai.use(require('sinon-chai'))
 
 class RedisMock extends EventEmitter {
-  constructor () {
+  constructor (delegate) {
     super()
     this.data = {}
+    this.delegate = delegate
   }
 
   async connect () {
@@ -28,15 +28,17 @@ class RedisMock extends EventEmitter {
   }
 
   async get (key) {
+    if (this.delegate?.get) return this.delegate.get(key)
     return this.data[key]
   }
 
   async set (key, value) {
+    if (this.delegate?.set) return this.delegate.set(key)
     this.data[key] = value
   }
 
   quit () {
-
+    if (this.delegate?.quit) return this.delegate.quit()
   }
 }
 
@@ -52,11 +54,16 @@ describe('redis-brain', () => {
   it('exports a function', () => {
     expect(require('../index')).to.be.a('Function')
   })
+
   it('Hostname should never be empty', () => {
     process.env.REDIS_URL = 'redis://'
     const robot = new Robot(null, 'shell', false, 'hubot')
     sinon.spy(robot.logger, 'info')
-    robot.loadFile(path.resolve('src/'), 'redis-brain.js')
+    redisBrain(robot, {
+      createClient: (options) => {
+        return new RedisMock()
+      }
+    })
     robot.run()
     expect(robot.logger.info).to.have.been.calledWith('hubot-redis-brain: Discovered redis from REDIS_URL environment variable: redis://')
     robot.shutdown()
@@ -89,7 +96,6 @@ describe('redis-brain', () => {
     process.env.REDIS_NO_CHECK = 'true'
     redisBrain(robot, {
       createClient: (options) => {
-        console.log(options.socket)
         expect(options.url).to.equal(process.env.REDIS_URL)
         expect(options.socket.tls).to.be.true
         expect(options.no_ready_check).to.be.true
@@ -102,5 +108,45 @@ describe('redis-brain', () => {
     delete process.env.REDIS_URL
     delete process.env.REDIS_REJECT_UNAUTHORIZED
     delete process.env.REDIS_NO_CHECK
+  })
+
+  it('Setting the prefix with redis://localhost:6379/prefix-for-redis-key', () => {
+    process.env.REDIS_URL = 'redis://localhost:6379/prefix-for-redis-key'
+    const robot = new Robot(null, 'shell', false, 'hubot')
+    const delegate = {
+      data: {},
+      async get (key) {
+        expect(key).to.equal('prefix-for-redis-key:storage')
+        robot.shutdown()
+        delete process.env.REDIS_URL
+        return this.data[key]
+      }
+    }
+    redisBrain(robot, {
+      createClient: (options) => {
+        return new RedisMock(delegate)
+      }
+    })
+    robot.run()
+  })
+
+  it('Setting the prefix in the query string redis://:password@/var/run/redis.sock?prefix-for-redis-key', () => {
+    process.env.REDIS_URL = 'redis://username:test@/var/run/redis.sock?prefix-for-redis-key'
+    const robot = new Robot(null, 'shell', false, 'hubot')
+    const delegate = {
+      data: {},
+      async get (key) {
+        expect(key).to.equal('prefix-for-redis-key:storage')
+        robot.shutdown()
+        delete process.env.REDIS_URL
+        return this.data[key]
+      }
+    }
+    redisBrain(robot, {
+      createClient: (options) => {
+        return new RedisMock(delegate)
+      }
+    })
+    robot.run()
   })
 })

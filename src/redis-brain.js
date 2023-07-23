@@ -30,7 +30,19 @@ module.exports = function (robot, redis = Redis) {
     robot.logger.info('Turning off redis ready checks')
   }
 
-  const info = new URL(redisUrl)
+  let info = null
+  let prefix = ''
+  try {
+    info = new URL(redisUrl)
+    prefix = (info.pathname ? info.pathname.replace('/', '') : undefined) || 'hubot'
+  } catch (err) {
+    if (err.code === 'ERR_INVALID_URL') {
+      const urlPath = redisUrl.replace(/rediss?:\/{2}\:?(.*@)?/, '')
+      info = new URL(`redis://${urlPath}`)
+      prefix = info.search?.replace('?', '') || 'hubot'
+    }
+  }
+
   let redisOptions = {
     url: redisUrl
   }
@@ -52,8 +64,6 @@ module.exports = function (robot, redis = Redis) {
   if (redisSocket) {
     redisOptions = Object.assign(redisOptions || {}, { socket: redisSocket })
   }
-
-  const prefix = (info.pathname ? info.pathname.replace('/', '') : undefined) || 'hubot'
 
   const client = redis.createClient(redisOptions)
 
