@@ -44,11 +44,9 @@ module.exports = function (robot) {
 
   robot.brain.setAutoSave(false)
 
-  const getData = () =>
-    client.get(`${prefix}:storage`, function (err, reply) {
-      if (err) {
-        throw err
-      } else if (reply) {
+  const getData = () => {
+    client.get(`${prefix}:storage`).then((reply) => {
+      if (reply) {
         robot.logger.info(`hubot-redis-brain: Data for ${prefix} brain retrieved from Redis`)
         robot.brain.mergeData(JSON.parse(reply.toString()))
         robot.brain.emit('connected')
@@ -59,7 +57,10 @@ module.exports = function (robot) {
       }
 
       robot.brain.setAutoSave(true)
+    }).catch(err => {
+      robot.logger.error(`hubot-redis-brain: Unable to get data from Redis: ${err}`)
     })
+  }
 
   if (info.auth) {
     client.auth(info.auth.split(':')[1], function (err) {
@@ -91,6 +92,7 @@ module.exports = function (robot) {
   })
 
   robot.brain.on('close', () => client.quit())
+  client.connect().then(() => {}).catch(robot.logger.error)
 }
 
 function getRedisEnv () {
