@@ -22,7 +22,8 @@
   "scripts": {
     "pretest": "standard",
     "test": "nyc --reporter=html --reporter=text mocha --exit",
-    "e2e": "mocha --exit test/e2e",
+    "test:watch": "mocha --watch --exit",
+    "e2e": "mocha test/e2e --exit",
     "standard": "standard"
   },
   "dependencies": {

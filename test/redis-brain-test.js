@@ -2,10 +2,10 @@
 
 /* global describe, it */
 /* eslint-disable no-unused-expressions */
-const Redis = require('redis')
 const shell = require('hubot/src/adapters/shell')
 const Adapter = require('hubot/src/adapter')
-
+const redisBrain = require('../src/redis-brain.js')
+const EventEmitter = require('events')
 const path = require('path')
 
 const chai = require('chai')
@@ -17,32 +17,90 @@ const Robot = Hubot.Robot
 
 chai.use(require('sinon-chai'))
 
+class RedisMock extends EventEmitter {
+  constructor () {
+    super()
+    this.data = {}
+  }
+
+  async connect () {
+    this.emit('connect')
+  }
+
+  async get (key) {
+    return this.data[key]
+  }
+
+  async set (key, value) {
+    this.data[key] = value
+  }
+
+  quit () {
+
+  }
+}
+
+// The mock-adapter-v3 has old dependencies with security issues, so don't use that.
+// Instead, we'll use the shell adapter and mock the use() method because the current version of Hubot
+// doesn't have a way to specify an adapter via a path.
+
+shell.use = robot => {
+  return new Adapter()
+}
+
 describe('redis-brain', () => {
   it('exports a function', () => {
     expect(require('../index')).to.be.a('Function')
   })
+  it('Hostname should never be empty', () => {
+    process.env.REDIS_URL = 'redis://'
+    const robot = new Robot(null, 'shell', false, 'hubot')
+    sinon.spy(robot.logger, 'info')
+    robot.loadFile(path.resolve('src/'), 'redis-brain.js')
+    robot.run()
+    expect(robot.logger.info).to.have.been.calledWith('hubot-redis-brain: Discovered redis from REDIS_URL environment variable: redis://')
+    robot.shutdown()
+    sinon.restore()
+    delete process.env.REDIS_URL
+  })
 
-  it('connects to redis', () => {
-    // The mock-adapter-v3 has old dependencies with security issues, so don't use that.
-    // Instead, we'll use the shell adapter and mock the use() method because the current version of Hubot
-    // doesn't have a way to specify an adapter via a path.
+  it('Connect to redis without setting the REDIS_URL environment variable', () => {
+    delete process.env.REDIS_URL
+    const robot = new Robot(null, 'shell', false, 'hubot')
+    sinon.spy(robot.logger, 'info')
+    redisBrain(robot, {
+      createClient: (options) => {
+        return new RedisMock()
+      }
+    })
+    robot.run()
+    expect(robot.logger.info).to.have.been.calledWith('hubot-redis-brain: Using default redis on localhost:6379')
+    robot.shutdown()
+    sinon.restore()
+  })
 
+  it('Connect vis SSL: Check that the options are set by environment variables', () => {
     shell.use = robot => {
       return new Adapter()
     }
-
     const robot = new Robot(null, 'shell', false, 'hubot')
-
-    sinon.spy(Redis, 'createClient')
-    sinon.spy(robot.logger, 'info')
-
-    robot.loadFile(path.resolve('src/'), 'redis-brain.js')
+    process.env.REDIS_URL = 'rediss://localhost:6379'
+    process.env.REDIS_REJECT_UNAUTHORIZED = 'false'
+    process.env.REDIS_NO_CHECK = 'true'
+    redisBrain(robot, {
+      createClient: (options) => {
+        console.log(options.socket)
+        expect(options.url).to.equal(process.env.REDIS_URL)
+        expect(options.socket.tls).to.be.true
+        expect(options.no_ready_check).to.be.true
+        expect(options.socket.rejectUnauthorized).to.be.false
+        return new RedisMock()
+      }
+    })
     robot.run()
-
-    expect(Redis.createClient).to.have.been.calledOnce
-    expect(Redis.createClient).to.have.been.calledWith('6379', 'localhost')
-    expect(robot.logger.info).to.have.been.calledWith('hubot-redis-brain: Using default redis on localhost:6379')
-
     robot.shutdown()
+    delete process.env.REDIS_URL
+    delete process.env.REDIS_REJECT_UNAUTHORIZED
+    delete process.env.REDIS_NO_CHECK
   })
 })
