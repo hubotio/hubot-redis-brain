@@ -86,6 +86,7 @@ jobs:
       issues: write
       pull-requests: write
       id-token: write
+    if: github.ref == 'refs/heads/main'
     if: ${{ success() }}
     steps:
       - name: Checkout
