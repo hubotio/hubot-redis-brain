@@ -1,6 +1,4 @@
-![Build Status](https://github.com/hubotio/hubot-redis-brain/actions/workflows/release.yml/badge.svg)
-
-[![Coverage Status](https://coveralls.io/repos/github/hubotio/hubot-redis-brain/badge.svg?branch=main)](https://coveralls.io/github/hubotio/hubot-redis-brain?branch=main)
+![Build Status](https://github.com/hubotio/hubot-redis-brain/actions/workflows/pipeline.yml/badge.svg)
 
 # hubot-redis-brain
 
