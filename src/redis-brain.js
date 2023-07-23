@@ -37,7 +37,7 @@ module.exports = function (robot, redis = Redis) {
     prefix = (info.pathname ? info.pathname.replace('/', '') : undefined) || 'hubot'
   } catch (err) {
     if (err.code === 'ERR_INVALID_URL') {
-      const urlPath = redisUrl.replace(/rediss?:\/{2}\:?(.*@)?/, '')
+      const urlPath = redisUrl.replace(/rediss?:\/{2}:?(.*@)?/, '')
       info = new URL(`redis://${urlPath}`)
       prefix = info.search?.replace('?', '') || 'hubot'
     }
