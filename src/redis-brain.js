@@ -16,13 +16,12 @@
 const URL = require('url').URL
 const Redis = require('redis')
 
-module.exports = function (robot) {
-  let client, prefix
+module.exports = function (robot, redis = Redis) {
   const redisUrlEnv = getRedisEnv()
   const redisUrl = process.env[redisUrlEnv] || 'redis://localhost:6379'
 
   if (redisUrlEnv) {
-    robot.logger.info(`hubot-redis-brain: Discovered redis from ${redisUrlEnv} environment variable`)
+    robot.logger.info(`hubot-redis-brain: Discovered redis from ${redisUrlEnv} environment variable: ${redisUrl}`)
   } else {
     robot.logger.info('hubot-redis-brain: Using default redis on localhost:6379')
   }
@@ -31,16 +30,42 @@ module.exports = function (robot) {
     robot.logger.info('Turning off redis ready checks')
   }
 
-  const info = new URL(redisUrl)
-  if (info.hostname === '') {
-    client = Redis.createClient(info.pathname)
-    prefix = (info.query ? info.query.toString() : undefined) || 'hubot'
-  } else {
-    client = (info.auth || process.env.REDIS_NO_CHECK)
-      ? Redis.createClient(info.port, info.hostname, { no_ready_check: true })
-      : Redis.createClient(info.port, info.hostname)
+  let info = null
+  let prefix = ''
+  try {
+    info = new URL(redisUrl)
     prefix = (info.pathname ? info.pathname.replace('/', '') : undefined) || 'hubot'
+  } catch (err) {
+    if (err.code === 'ERR_INVALID_URL') {
+      const urlPath = redisUrl.replace(/rediss?:\/{2}:?(.*@)?/, '')
+      info = new URL(`redis://${urlPath}`)
+      prefix = info.search?.replace('?', '') || 'hubot'
+    }
   }
+
+  let redisOptions = {
+    url: redisUrl
+  }
+
+  let redisSocket = null
+
+  if (info.protocol === 'rediss:') {
+    redisSocket = { tls: true }
+  }
+
+  if (process.env.REDIS_REJECT_UNAUTHORIZED) {
+    redisSocket.rejectUnauthorized = process.env.REDIS_REJECT_UNAUTHORIZED === 'true'
+  }
+
+  if (info.auth || process.env.REDIS_NO_CHECK) {
+    redisOptions = Object.assign(redisOptions || {}, { no_ready_check: true })
+  }
+
+  if (redisSocket) {
+    redisOptions = Object.assign(redisOptions || {}, { socket: redisSocket })
+  }
+
+  const client = redis.createClient(redisOptions)
 
   robot.brain.setAutoSave(false)
 
