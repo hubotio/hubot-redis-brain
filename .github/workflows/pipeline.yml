@@ -86,7 +86,7 @@ jobs:
       issues: write
       pull-requests: write
       id-token: write
-    if: ${{ success() }}
+    if: github.ref == 'refs/heads/main' && ${{ success() }}
     steps:
       - name: Checkout
         uses: actions/checkout@v3
