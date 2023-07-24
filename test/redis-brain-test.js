@@ -110,8 +110,8 @@ describe('redis-brain', () => {
     delete process.env.REDIS_NO_CHECK
   })
 
-  it('Setting the prefix with redis://localhost:6379/prefix-for-redis-key', () => {
-    process.env.REDIS_URL = 'redis://localhost:6379/prefix-for-redis-key'
+  it('Setting the prefix with redis://localhost:6379/1?prefix-for-redis-key', () => {
+    process.env.REDIS_URL = 'redis://localhost:6379/1?prefix-for-redis-key'
     const robot = new Robot(null, 'shell', false, 'hubot')
     const delegate = {
       data: {},
@@ -124,6 +124,49 @@ describe('redis-brain', () => {
     }
     redisBrain(robot, {
       createClient: (options) => {
+        expect(options.database).to.equal(1)
+        return new RedisMock(delegate)
+      }
+    })
+    robot.run()
+  })
+
+  it('Setting the prefix with no database number specified redis://localhost?prefix-for-redis-key', () => {
+    process.env.REDIS_URL = 'redis://localhost?prefix-for-redis-key'
+    const robot = new Robot(null, 'shell', false, 'hubot')
+    const delegate = {
+      data: {},
+      async get (key) {
+        expect(key).to.equal('prefix-for-redis-key:storage')
+        robot.shutdown()
+        delete process.env.REDIS_URL
+        return this.data[key]
+      }
+    }
+    redisBrain(robot, {
+      createClient: (options) => {
+        expect(options.database).to.be.undefined
+        return new RedisMock(delegate)
+      }
+    })
+    robot.run()
+  })
+
+  it('Setting the prefix with no database number specified and a trailing slash redis://localhost:6379/?prefix-for-redis-key', () => {
+    process.env.REDIS_URL = 'redis://localhost:6379/?prefix-for-redis-key'
+    const robot = new Robot(null, 'shell', false, 'hubot')
+    const delegate = {
+      data: {},
+      async get (key) {
+        expect(key).to.equal('prefix-for-redis-key:storage')
+        robot.shutdown()
+        delete process.env.REDIS_URL
+        return this.data[key]
+      }
+    }
+    redisBrain(robot, {
+      createClient: (options) => {
+        expect(options.database).to.be.undefined
         return new RedisMock(delegate)
       }
     })
@@ -144,6 +187,7 @@ describe('redis-brain', () => {
     }
     redisBrain(robot, {
       createClient: (options) => {
+        expect(options.database).to.be.undefined
         return new RedisMock(delegate)
       }
     })

@@ -32,19 +32,24 @@ module.exports = function (robot, redis = Redis) {
 
   let info = null
   let prefix = ''
+  let database = null
   try {
     info = new URL(redisUrl)
-    prefix = (info.pathname ? info.pathname.replace('/', '') : undefined) || 'hubot'
+    database = Number((info.pathname ? info.pathname.replace('/', '') : undefined) || 0)
   } catch (err) {
     if (err.code === 'ERR_INVALID_URL') {
       const urlPath = redisUrl.replace(/rediss?:\/{2}:?(.*@)?/, '')
       info = new URL(`redis://${urlPath}`)
-      prefix = info.search?.replace('?', '') || 'hubot'
     }
   }
+  prefix = info.search?.replace('?', '') || 'hubot'
 
   let redisOptions = {
     url: redisUrl
+  }
+
+  if (database) {
+    redisOptions = Object.assign(redisOptions || {}, { database })
   }
 
   let redisSocket = null
