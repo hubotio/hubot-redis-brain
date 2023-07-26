@@ -1,5 +1,7 @@
 ![Build Status](https://github.com/hubotio/hubot-redis-brain/actions/workflows/pipeline.yml/badge.svg)
 
+![E2E Tests](https://github.com/hubotio/hubot-redis-brain/actions/workflows/e2e.yml/badge.svg)
+
 # hubot-redis-brain
 
 A hubot script to persist hubot's brain using redis
