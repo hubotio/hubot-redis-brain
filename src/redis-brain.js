@@ -19,7 +19,7 @@ const Redis = require('redis')
 module.exports = function (robot, redis = Redis) {
   const redisUrlEnv = getRedisEnv()
   const redisUrl = process.env[redisUrlEnv] || 'redis://localhost:6379'
-
+  robot.config = Object.assign(robot.config || {}, { redisUrl })
   if (redisUrlEnv) {
     robot.logger.info(`hubot-redis-brain: Discovered redis from ${redisUrlEnv} environment variable: ${redisUrl}`)
   } else {
