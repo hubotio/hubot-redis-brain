@@ -23,7 +23,7 @@
     "pretest": "standard",
     "test": "node --test test/redis-brain-test.js",
     "test:watch": "node --watch --test",
-    "e2e": "node --test test/e2e"
+    "e2e": "node --test test/e2e/*"
   },
   "peerDependencies": {
     "hubot": ">= 9.x.x"
