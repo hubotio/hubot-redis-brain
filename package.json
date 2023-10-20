@@ -25,9 +25,6 @@
     "test:watch": "node --watch --test",
     "e2e": "node --test test/e2e"
   },
-  "dependencies": {
-    "redis": "^4.6.6"
-  },
   "peerDependencies": {
     "hubot": ">= 9.x.x"
   },
@@ -40,5 +37,8 @@
       "next"
     ],
     "dryRun": false
+  },
+  "dependencies": {
+    "redis": "^4.6.10"
   }
 }
