@@ -1,11 +1,13 @@
 'use strict'
-const { describe, it } = require('node:test')
-const assert = require('node:assert/strict')
-const path = require('path')
-const Robot = require('hubot/src/robot.js')
+
+import { describe, it } from 'node:test'
+import assert from 'node:assert/strict'
+import path from 'node:path'
+import { Robot } from 'hubot'
+
 describe('e2e', () => {
   it('connects to redis', async () => {
-    const robot = new Robot('shell', false, 'hubot')
+    const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     robot.brain.on('loaded', actual => {
       const expected = { users: {}, _private: {} }
@@ -14,7 +16,7 @@ describe('e2e', () => {
     robot.brain.on('connected', () => {
       assert.ok(true)
     })
-    await robot.loadFile(path.resolve('src/'), 'redis-brain.js')
+    await robot.loadFile(path.resolve('src/'), 'RedisBrain.mjs')
     await robot.run()
     robot.shutdown()
   })

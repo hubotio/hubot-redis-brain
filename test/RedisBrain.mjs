@@ -1,13 +1,12 @@
 'use strict'
 
-const shell = require('hubot/src/adapters/shell')
-const Adapter = require('hubot/src/adapter')
-const redisBrain = require('../src/redis-brain.js')
-const EventEmitter = require('events')
-
-const { describe, it } = require('node:test')
-const assert = require('node:assert/strict')
-const Robot = require('hubot/src/robot.js')
+import { describe, it } from 'node:test'
+import assert from 'node:assert/strict'
+import { Robot, Adapter } from 'hubot'
+import Shell from 'hubot/src/adapters/Shell.mjs'
+import redisBrain from '../src/RedisBrain.mjs'
+import EventEmitter from 'events'
+import HubotRedis from '../index.mjs'
 
 class RedisMock extends EventEmitter {
   constructor (delegate) {
@@ -37,12 +36,12 @@ class RedisMock extends EventEmitter {
 
 describe('redis-brain', () => {
   it('exports a function', () => {
-    assert.equal(typeof require('../index'), 'function')
+    assert.equal(typeof HubotRedis, 'function')
   })
 
   it('Hostname should never be empty', async () => {
     process.env.REDIS_URL = 'redis://'
-    const robot = new Robot('shell', false, 'hubot')
+    const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     redisBrain(robot, {
       createClient: (options) => {
@@ -57,7 +56,7 @@ describe('redis-brain', () => {
 
   it('Connect to redis without setting the REDIS_URL environment variable', async () => {
     delete process.env.REDIS_URL
-    const robot = new Robot('shell', false, 'hubot')
+    const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     redisBrain(robot, {
       createClient: (options) => {
@@ -70,10 +69,10 @@ describe('redis-brain', () => {
   })
 
   it('Connect vis SSL: Check that the options are set by environment variables', async () => {
-    shell.use = robot => {
+    Shell.use = robot => {
       return new Adapter()
     }
-    const robot = new Robot('shell', false, 'hubot')
+    const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     process.env.REDIS_URL = 'rediss://localhost:6379'
     process.env.REDIS_REJECT_UNAUTHORIZED = 'false'
@@ -96,7 +95,7 @@ describe('redis-brain', () => {
 
   it('Setting the prefix with redis://localhost:6379/1?prefix-for-redis-key', async () => {
     process.env.REDIS_URL = 'redis://localhost:6379/1?prefix-for-redis-key'
-    const robot = new Robot('shell', false, 'hubot')
+    const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     const delegate = {
       data: {},
@@ -118,7 +117,7 @@ describe('redis-brain', () => {
 
   it('Setting the prefix with no database number specified redis://localhost?prefix-for-redis-key', async () => {
     process.env.REDIS_URL = 'redis://localhost?prefix-for-redis-key'
-    const robot = new Robot('shell', false, 'hubot')
+    const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     const delegate = {
       data: {},
@@ -140,7 +139,7 @@ describe('redis-brain', () => {
 
   it('Setting the prefix with no database number specified and a trailing slash redis://localhost:6379/?prefix-for-redis-key', async () => {
     process.env.REDIS_URL = 'redis://localhost:6379/?prefix-for-redis-key'
-    const robot = new Robot('shell', false, 'hubot')
+    const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     const delegate = {
       data: {},
@@ -162,7 +161,7 @@ describe('redis-brain', () => {
 
   it('Setting the prefix in the query string redis://:password@/var/run/redis.sock?prefix-for-redis-key', async () => {
     process.env.REDIS_URL = 'redis://username:test@/var/run/redis.sock?prefix-for-redis-key'
-    const robot = new Robot('shell', false, 'hubot')
+    const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     const delegate = {
       data: {},
