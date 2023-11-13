@@ -13,23 +13,20 @@
     "url": "https://github.com/hubotio/hubot-redis-brain.git"
   },
   "engines": {
-    "node": ">= 18.0.0"
+    "node": ">= 18"
   },
   "bugs": {
     "url": "https://github.com/hubotio/hubot-redis-brain/issues"
   },
-  "main": "index.js",
+  "main": "index.mjs",
   "scripts": {
     "pretest": "standard",
-    "test": "node --test test/redis-brain-test.js",
+    "test": "node --test test/*.mjs",
     "test:watch": "node --watch --test",
     "e2e": "node --test test/e2e/*"
   },
   "peerDependencies": {
-    "hubot": ">= 9.x.x"
-  },
-  "devDependencies": {
-    "standard": "^17.1.0"
+    "hubot": ">= 11 || 0.0.0-development"
   },
   "release": {
     "branches": [
@@ -40,5 +37,8 @@
   },
   "dependencies": {
     "redis": "^4.6.10"
+  },
+  "devDependencies": {
+    "standard": "^17.1.0"
   }
 }

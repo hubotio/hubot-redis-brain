@@ -6,7 +6,7 @@
 
 A hubot script to persist hubot's brain using redis
 
-See [`src/redis-brain.js`](src/redis-brain.js) for full documentation.
+See [`src/RedisBrain.js`](src/RedisBrain.js) for full documentation.
 
 ## Installation
 

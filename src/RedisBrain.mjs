@@ -13,10 +13,10 @@
 // Commands:
 //   None
 
-const URL = require('url').URL
-const Redis = require('redis')
+import { URL } from 'url'
+import Redis from 'redis'
 
-module.exports = function (robot, redis = Redis) {
+export default (robot, redis = Redis) => {
   const redisUrlEnv = getRedisEnv()
   const redisUrl = process.env[redisUrlEnv] || 'redis://localhost:6379'
   robot.config = Object.assign(robot.config || {}, { redisUrl })
