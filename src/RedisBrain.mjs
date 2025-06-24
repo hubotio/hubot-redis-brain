@@ -21,7 +21,19 @@ export default (robot, redis = Redis) => {
   const redisUrl = process.env[redisUrlEnv] || 'redis://localhost:6379'
   robot.config = Object.assign(robot.config || {}, { redisUrl })
   if (redisUrlEnv) {
-    robot.logger.info(`hubot-redis-brain: Discovered redis from ${redisUrlEnv} environment variable: ${redisUrl}`)
+    // Sanitize password in URL for logging
+    const sanitizedUrl = (() => {
+      try {
+        const urlObj = new URL(redisUrl)
+        if (urlObj.password) {
+          urlObj.password = '*****'
+        }
+        return urlObj.toString()
+      } catch {
+        return redisUrl
+      }
+    })()
+    robot.logger.info(`hubot-redis-brain: Discovered redis from ${redisUrlEnv} environment variable: ${sanitizedUrl}`)
   } else {
     robot.logger.info('hubot-redis-brain: Using default redis on localhost:6379')
   }
