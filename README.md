@@ -1,5 +1,7 @@
 ![Build Status](https://github.com/hubotio/hubot-redis-brain/actions/workflows/pipeline.yml/badge.svg)
 
+Note: The build is failing because I don't have access to this organization to update the NPM_TOKEN; nor do I have access to the NPM package on npmjs to create a new NPM_TOKEN. If you want to use the latest version of this module, you can `npm i hubotio/hubot-redis-brain#main` install it from the GitHub repo directly, instead of the npm registry.
+
 ![E2E Tests](https://github.com/hubotio/hubot-redis-brain/actions/workflows/e2e.yml/badge.svg)
 
 # hubot-redis-brain
