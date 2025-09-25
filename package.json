@@ -21,8 +21,8 @@
   "main": "index.mjs",
   "scripts": {
     "pretest": "standard",
-    "test": "node --test test/*.mjs",
-    "test:watch": "node --watch --test",
+    "test": "node --test --test-timeout=5000 test/*.mjs",
+    "test:watch": "node --watch --test --test-timeout=5000",
     "e2e": "node --test test/e2e/*"
   },
   "peerDependencies": {
