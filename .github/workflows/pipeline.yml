@@ -1,18 +1,20 @@
 name: Build and Release Pipeline
-
 on:
-  - push
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 permissions:
-  contents: read
+  contents: write
+  issues: write
+  pull-requests: write
+
 jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      id-token: write
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -30,11 +32,6 @@ jobs:
   test:
     name: Fast Tests
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      id-token: write
     needs: build
     steps:
       - name: Checkout
@@ -58,11 +55,6 @@ jobs:
         image: redis
         ports:
           - 6379:6379
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      id-token: write
     needs: build
     steps:
       - name: Checkout
@@ -81,11 +73,6 @@ jobs:
   release:
     needs: [build, test, e2e]
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      issues: write
-      pull-requests: write
-      id-token: write
     if: github.ref == 'refs/heads/main' && ${{ success() }}
     steps:
       - name: Checkout
