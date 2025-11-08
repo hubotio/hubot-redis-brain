@@ -57,4 +57,6 @@ jobs:
         run: node .github/scripts/check-npm.mjs
       - name: Publish to npm
         if: ${{ steps.check_ci.outputs.result == 'true' && steps.check_codeql.outputs.result == 'true' && (steps.release.outputs.released == 'true' || steps.check_npm.outputs.exists == 'false') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: npm publish --provenance --access public
