@@ -45,7 +45,7 @@
   },
   "files": [
     "index.mjs",
-    "src/RedisBrain.mjs",
+    "scripts/RedisBrain.mjs",
     "README.md"
   ]
 }

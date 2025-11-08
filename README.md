@@ -8,7 +8,7 @@ Note: The build is failing because I don't have access to this organization to u
 
 A hubot script to persist hubot's brain using redis
 
-See [`src/RedisBrain.js`](src/RedisBrain.js) for full documentation.
+See [`scripts/RedisBrain.js`](scripts/RedisBrain.js) for full documentation.
 
 ## Installation
 

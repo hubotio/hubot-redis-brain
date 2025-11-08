@@ -35,7 +35,7 @@ class RedisBrain extends Brain {
 
     this.#setupEventHandlers()
     robot.on('running', () => {
-      console.log('bot is running, clearing save interval if any')
+      this.robot.logger.debug('bot is running, clearing save interval if any')
       clearInterval(this.saveInterval)
       this.saveInterval = null
     })
@@ -76,9 +76,9 @@ class RedisBrain extends Brain {
           return redisUrl
         }
       })()
-      this.robot.logger.info(`${MODULE_NAME}: Discovered redis from ${redisUrlEnv} environment variable: ${sanitizedUrl}`)
+      this.robot.logger.debug(`${MODULE_NAME}: Discovered redis from ${redisUrlEnv} environment variable: ${sanitizedUrl}`)
     } else {
-      this.robot.logger.info(`${MODULE_NAME}: Using default redis on localhost:6379`)
+      this.robot.logger.debug(`${MODULE_NAME}: Using default redis on localhost:6379`)
     }
 
     if (process.env.REDIS_NO_CHECK) {

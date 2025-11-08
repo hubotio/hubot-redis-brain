@@ -1,10 +1,10 @@
 'use strict'
 
-import { describe, it } from 'node:test'
+import { describe, it, afterEach } from 'node:test'
 import assert from 'node:assert/strict'
 import { Robot, Adapter } from 'hubot'
 import Shell from 'hubot/src/adapters/Shell.mjs'
-import redisBrain from '../src/RedisBrain.mjs'
+import redisBrain from '../scripts/RedisBrain.mjs'
 import EventEmitter from 'events'
 import HubotRedis from '../index.mjs'
 
@@ -91,12 +91,18 @@ class RedisMock extends EventEmitter {
 }
 
 describe('redis-brain', () => {
+  afterEach(() => {
+    delete process.env.REDIS_URL
+    delete process.env.REDIS_REJECT_UNAUTHORIZED
+    delete process.env.REDIS_NO_CHECK
+  })
   it('exports a function', () => {
     assert.equal(typeof HubotRedis, 'function')
   })
 
   it('Hostname should never be empty', async () => {
-    process.env.REDIS_URL = 'redis://'
+    const expected = 'redis://'
+    process.env.REDIS_URL = expected
     const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     await redisBrain(robot, {
@@ -105,13 +111,11 @@ describe('redis-brain', () => {
       }
     })
     await robot.run()
-    assert.deepEqual(robot.config.redisUrl, process.env.REDIS_URL)
+    assert.deepEqual(robot.config.redisUrl, expected)
     robot.shutdown()
-    delete process.env.REDIS_URL
   })
 
   it('Connect to redis without setting the REDIS_URL environment variable', async () => {
-    delete process.env.REDIS_URL
     const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     redisBrain(robot, {
@@ -144,9 +148,6 @@ describe('redis-brain', () => {
     })
     await robot.run()
     robot.shutdown()
-    delete process.env.REDIS_URL
-    delete process.env.REDIS_REJECT_UNAUTHORIZED
-    delete process.env.REDIS_NO_CHECK
   })
 
   it('Setting the prefix with redis://localhost:6379/1?prefix-for-redis-key', async () => {
