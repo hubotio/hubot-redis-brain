@@ -18,20 +18,22 @@ import Redis from 'redis'
 import { EventEmitter } from 'events'
 import { Brain } from 'hubot'
 
+const MODULE_NAME = 'hubot-redis-brain'
+
 class RedisBrain extends Brain {
   constructor (robot, redis = Redis) {
     super(robot)
 
     this.robot = robot
-    this.prefix = this._getPrefix()
-    this.client = this._createRedisClient(redis)
+    this.prefix = this.#getPrefix()
+    this.client = this.#createRedisClient(redis)
     this._connected = false
 
     // Minimal in-memory data structure - no caching
     this.data = { users: {}, _private: {} }
     this.autoSave = false // We save directly to Redis
 
-    this._setupEventHandlers()
+    this.#setupEventHandlers()
     robot.on('running', () => {
       console.log('bot is running, clearing save interval if any')
       clearInterval(this.saveInterval)
@@ -39,8 +41,8 @@ class RedisBrain extends Brain {
     })
   }
 
-  _getPrefix () {
-    const redisUrlEnv = this._getRedisEnv()
+  #getPrefix () {
+    const redisUrlEnv = this.#getRedisEnv()
     const redisUrl = process.env[redisUrlEnv] || 'redis://localhost:6379'
 
     let info = null
@@ -56,8 +58,8 @@ class RedisBrain extends Brain {
     return info.search?.replace('?', '') || 'hubot'
   }
 
-  _createRedisClient (redis) {
-    const redisUrlEnv = this._getRedisEnv()
+  #createRedisClient (redis) {
+    const redisUrlEnv = this.#getRedisEnv()
     const redisUrl = process.env[redisUrlEnv] || 'redis://localhost:6379'
     this.robot.config = Object.assign(this.robot.config || {}, { redisUrl })
 
@@ -74,9 +76,9 @@ class RedisBrain extends Brain {
           return redisUrl
         }
       })()
-      this.robot.logger.info(`hubot-redis-brain: Discovered redis from ${redisUrlEnv} environment variable: ${sanitizedUrl}`)
+      this.robot.logger.info(`${MODULE_NAME}: Discovered redis from ${redisUrlEnv} environment variable: ${sanitizedUrl}`)
     } else {
-      this.robot.logger.info('hubot-redis-brain: Using default redis on localhost:6379')
+      this.robot.logger.info(`${MODULE_NAME}: Using default redis on localhost:6379`)
     }
 
     if (process.env.REDIS_NO_CHECK) {
@@ -123,7 +125,7 @@ class RedisBrain extends Brain {
     })
 
     client.on('connect', () => {
-      this.robot.logger.debug('hubot-redis-brain: Successfully connected to Redis')
+      this.robot.logger.debug(`${MODULE_NAME}: Successfully connected to Redis`)
       this._connected = true
       this.emit('connected')
     })
@@ -131,25 +133,20 @@ class RedisBrain extends Brain {
     if (info.auth) {
       client.auth(info.auth.split(':')[1], (err) => {
         if (err) {
-          return this.robot.logger.error('hubot-redis-brain: Failed to authenticate to Redis')
+          return this.robot.logger.error(`${MODULE_NAME}: Failed to authenticate to Redis`)
         }
-        this.robot.logger.info('hubot-redis-brain: Successfully authenticated to Redis')
+        this.robot.logger.info(`${MODULE_NAME}: Successfully authenticated to Redis`)
       })
     }
 
     return client
   }
 
-  _setupEventHandlers () {
+  #setupEventHandlers () {
     this.on('close', async () => {})
   }
 
-  getRobot () {
-    return this.robot
-  }
-
   // Direct Redis operations - no memory caching
-
   get (key) {
     if (!this._connected || !key) return null
 
@@ -163,11 +160,11 @@ class RedisBrain extends Brain {
           if (!this.data._private) this.data._private = {}
           this.data._private[key] = parsed
         } catch (err) {
-          this.robot.logger.error(`hubot-redis-brain: Error parsing key ${key}: ${err}`)
+          this.robot.logger.error(`${MODULE_NAME}: Error parsing key ${key}: ${err}`)
         }
       }
     }).catch(err => {
-      this.robot.logger.error(`hubot-redis-brain: Error getting key ${key}: ${err}`)
+      this.robot.logger.error(`${MODULE_NAME}: Error getting key ${key}: ${err}`)
     })
 
     // Return from memory cache if available
@@ -192,7 +189,7 @@ class RedisBrain extends Brain {
         pipeline.hSet(`${this.prefix}:private`, k, JSON.stringify(pair[k]))
       })
       pipeline.exec().catch(err => {
-        this.robot.logger.error(`hubot-redis-brain: Error setting keys: ${err}`)
+        this.robot.logger.error(`${MODULE_NAME}: Error setting keys: ${err}`)
       })
     }
 
@@ -204,14 +201,13 @@ class RedisBrain extends Brain {
     if (!key || !this._connected) return this
 
     this.client.hDel(`${this.prefix}:private`, key).catch(err => {
-      this.robot.logger.error(`hubot-redis-brain: Error removing key ${key}: ${err}`)
+      this.robot.logger.error(`${MODULE_NAME}: Error removing key ${key}: ${err}`)
     })
 
     return this
   }
 
   // User operations - direct to Redis
-
   userForId (id, options = {}) {
     if (!id) return null
 
@@ -241,20 +237,20 @@ class RedisBrain extends Brain {
             if (options.room && user.room !== options.room) {
               user.room = options.room
               this.client.hSet(`${this.prefix}:users`, id, JSON.stringify(user)).catch(err => {
-                this.robot.logger.error(`hubot-redis-brain: Error updating user ${id}: ${err}`)
+                this.robot.logger.error(`${MODULE_NAME}: Error updating user ${id}: ${err}`)
               })
             }
           } else {
             // Save new user to Redis
             this.client.hSet(`${this.prefix}:users`, id, JSON.stringify(user)).catch(err => {
-              this.robot.logger.error(`hubot-redis-brain: Error saving new user ${id}: ${err}`)
+              this.robot.logger.error(`${MODULE_NAME}: Error saving new user ${id}: ${err}`)
             })
           }
         }).catch(err => {
-          this.robot.logger.error(`hubot-redis-brain: Error loading user ${id}: ${err}`)
+          this.robot.logger.error(`${MODULE_NAME}: Error loading user ${id}: ${err}`)
           // Save new user to Redis as fallback
           this.client.hSet(`${this.prefix}:users`, id, JSON.stringify(user)).catch(saveErr => {
-            this.robot.logger.error(`hubot-redis-brain: Error saving fallback user ${id}: ${saveErr}`)
+            this.robot.logger.error(`${MODULE_NAME}: Error saving fallback user ${id}: ${saveErr}`)
           })
         })
       }
@@ -263,7 +259,7 @@ class RedisBrain extends Brain {
       user.room = options.room
       if (this._connected) {
         this.client.hSet(`${this.prefix}:users`, id, JSON.stringify(user)).catch(err => {
-          this.robot.logger.error(`hubot-redis-brain: Error updating user room ${id}: ${err}`)
+          this.robot.logger.error(`${MODULE_NAME}: Error updating user room ${id}: ${err}`)
         })
       }
     }
@@ -299,12 +295,12 @@ class RedisBrain extends Brain {
               }
               this.data.users[id] = new User(id, JSON.parse(userData))
             } catch (err) {
-              this.robot.logger.error(`hubot-redis-brain: Error parsing user ${id}: ${err}`)
+              this.robot.logger.error(`${MODULE_NAME}: Error parsing user ${id}: ${err}`)
             }
           }
         }
       }).catch(err => {
-        this.robot.logger.error(`hubot-redis-brain: Error loading users for name search: ${err}`)
+        this.robot.logger.error(`${MODULE_NAME}: Error loading users for name search: ${err}`)
       })
     }
 
@@ -340,12 +336,12 @@ class RedisBrain extends Brain {
               }
               this.data.users[id] = new User(id, JSON.parse(userData))
             } catch (err) {
-              this.robot.logger.error(`hubot-redis-brain: Error parsing user ${id}: ${err}`)
+              this.robot.logger.error(`${MODULE_NAME}: Error parsing user ${id}: ${err}`)
             }
           }
         }
       }).catch(err => {
-        this.robot.logger.error(`hubot-redis-brain: Error loading users for fuzzy search: ${err}`)
+        this.robot.logger.error(`${MODULE_NAME}: Error loading users for fuzzy search: ${err}`)
       })
     }
 
@@ -387,10 +383,10 @@ class RedisBrain extends Brain {
         userObjects[id] = new User(id, JSON.parse(userData))
       }
 
-      this.robot.logger.info(`hubot-redis-brain: Retrieved ${Object.keys(userObjects).length} users from Redis`)
+      this.robot.logger.info(`${MODULE_NAME}: Retrieved ${Object.keys(userObjects).length} users from Redis`)
       return userObjects
     } catch (err) {
-      this.robot.logger.error(`hubot-redis-brain: Error loading all users: ${err}`)
+      this.robot.logger.error(`${MODULE_NAME}: Error loading all users: ${err}`)
       return {}
     }
   }
@@ -401,7 +397,7 @@ class RedisBrain extends Brain {
     try {
       await this.client.hSet(`${this.prefix}:users`, userId, JSON.stringify(userData))
     } catch (err) {
-      this.robot.logger.error(`hubot-redis-brain: Error saving user ${userId}: ${err}`)
+      this.robot.logger.error(`${MODULE_NAME}: Error saving user ${userId}: ${err}`)
     }
   }
 
@@ -433,7 +429,7 @@ class RedisBrain extends Brain {
       if (this.client.isOpen) {
         this.client.disconnect().then(() => {
           this.client = null
-        }).catch(err => this.robot.logger.error(`hubot-redis-brain: Error disconnecting from Redis: ${err}`))
+        }).catch(err => this.robot.logger.error(`${MODULE_NAME}: Error disconnecting from Redis: ${err}`))
       }
     }
     this.emit('close')
@@ -444,7 +440,7 @@ class RedisBrain extends Brain {
     await this.client.connect()
   }
 
-  _getRedisEnv () {
+  #getRedisEnv () {
     if (process.env.REDISTOGO_URL) return 'REDISTOGO_URL'
     if (process.env.REDISCLOUD_URL) return 'REDISCLOUD_URL'
     if (process.env.BOXEN_REDIS_URL) return 'BOXEN_REDIS_URL'
@@ -472,7 +468,7 @@ export default async (robot, redis = Redis) => {
   try {
     await redisBrain.connect()
   } catch (err) {
-    robot.logger.error(`hubot-redis-brain: Connection failed: ${err}`)
+    robot.logger.error(`${MODULE_NAME}: Connection failed: ${err}`)
   }
 
   return redisBrain
