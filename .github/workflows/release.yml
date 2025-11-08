@@ -1,0 +1,60 @@
+name: Manual Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_only:
+        description: 'Skip tagging and just publish the current package.json version if missing on npm'
+        required: false
+        default: 'false'
+
+permissions:
+  id-token: write # Required for OIDC
+  contents: write
+  actions: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.x'
+          registry-url: 'https://registry.npmjs.org'
+      - name: Check CI pipeline status
+        id: check_ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_FILE: ci-pipeline.yml
+        run: node .github/scripts/check-ci.mjs
+      - name: Check CodeQL status
+        id: check_codeql
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_FILE: codeql.yml
+        run: node .github/scripts/check-ci.mjs
+      - name: Configure Git user
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run release script
+        id: release
+        if: ${{ steps.check_ci.outputs.result == 'true' && steps.check_codeql.outputs.result == 'true' && inputs.publish_only != 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node .github/scripts/release.mjs
+      - name: Check npm for current version
+        id: check_npm
+        if: ${{ steps.check_ci.outputs.result == 'true' && steps.check_codeql.outputs.result == 'true' }}
+        run: node .github/scripts/check-npm.mjs
+      - name: Publish to npm
+        if: ${{ steps.check_ci.outputs.result == 'true' && steps.check_codeql.outputs.result == 'true' && (steps.release.outputs.released == 'true' || steps.check_npm.outputs.exists == 'false') }}
+        run: npm publish --provenance --access public

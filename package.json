@@ -1,44 +1,51 @@
 {
-  "name": "hubot-redis-brain",
-  "description": "A hubot script to persist hubot's brain using redis",
-  "version": "0.0.0-development",
-  "author": "Josh Nichols <technicalpickles@github.com>",
+  "name": "@hubot-friends/hubot-redis-brain",
+  "description": "A hubot script to persist hubot's brain using redis Hash Tables",
+  "version": "4.0.0",
+  "author": "Joey Guerra <github@joeyguerra.com>",
   "license": "MIT",
   "keywords": [
     "hubot",
-    "hubot-scripts"
+    "hubot-scripts",
+    "brain",
+    "redis"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/hubotio/hubot-redis-brain.git"
+    "url": "https://github.com/hubot-friends/hubot-redis-brain.git"
   },
   "engines": {
-    "node": ">= 18"
+    "node": ">= 24"
   },
   "bugs": {
-    "url": "https://github.com/hubotio/hubot-redis-brain/issues"
+    "url": "https://github.com/hubot-friends/hubot-redis-brain/issues"
   },
   "main": "index.mjs",
   "scripts": {
-    "pretest": "standard",
-    "test": "node --test test/*.mjs",
-    "test:watch": "node --watch --test",
-    "e2e": "node --test test/e2e/*"
+    "start": "hubot",
+    "test": "node --test --test-timeout=5000 test/*.mjs",
+    "test:watch": "node --watch --test --test-timeout=5000",
+    "e2e": "node --test test/e2e/*",
+    "start:redis": "docker run --rm -p 6379:6379 -d --name hubot-redis -v $(pwd)/redis-data:/data redis redis-server --appendonly yes"
   },
   "peerDependencies": {
-    "hubot": ">= 11 || 0.0.0-development"
+    "hubot": ">=13.0.0 || 0.0.0-development"
   },
   "release": {
     "branches": [
-      "main",
-      "next"
+      "main"
     ],
     "dryRun": false
   },
-  "dependencies": {
-    "redis": "^4.6.10"
+  "publishConfig": {
+    "access": "public"
   },
-  "devDependencies": {
-    "standard": "^17.1.0"
-  }
+  "dependencies": {
+    "redis": "^5.9.0"
+  },
+  "files": [
+    "index.mjs",
+    "scripts/RedisBrain.mjs",
+    "README.md"
+  ]
 }

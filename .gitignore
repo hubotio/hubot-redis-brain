@@ -2,3 +2,7 @@ node_modules
 .nyc_output/
 coverage
 .hubot_history
+.env
+external-scripts.json
+.DS_Store
+redis-data
