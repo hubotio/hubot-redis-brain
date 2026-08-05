@@ -26,7 +26,7 @@
     "e2e": "node --test test/e2e/*"
   },
   "peerDependencies": {
-    "hubot": ">= 13 || 0.0.0-development"
+    "hubot": ">= 14 || 0.0.0-development"
   },
   "release": {
     "branches": [
@@ -36,9 +36,9 @@
     "dryRun": false
   },
   "dependencies": {
-    "redis": "^4.6.10"
+    "redis": "^6.2.0"
   },
   "devDependencies": {
-    "standard": "^17.1.0"
+    "standard": "^17.1.2"
   }
 }
