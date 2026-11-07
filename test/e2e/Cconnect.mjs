@@ -13,11 +13,10 @@ describe('e2e', () => {
       const expected = { users: {}, _private: {} }
       assert.deepEqual(actual, expected)
     })
-    robot.brain.on('connected', () => {
-      assert.ok(true)
-    })
+    const connected = new Promise(resolve => robot.brain.once('connected', resolve))
     await robot.loadFile(path.resolve('src/'), 'RedisBrain.mjs')
     await robot.run()
+    await connected
     robot.shutdown()
   })
 })
