@@ -1,6 +1,6 @@
 {
   "name": "hubot-redis-brain",
-  "description": "A hubot script to persist hubot's brain using redis",
+  "description": "A hubot script to persist hubot's brain using redis, safe to share between several hubot instances",
   "version": "0.0.0-development",
   "author": "Josh Nichols <technicalpickles@github.com>",
   "license": "MIT",
@@ -26,7 +26,13 @@
     "e2e": "node --test test/e2e/*"
   },
   "peerDependencies": {
-    "hubot": ">= 14 || 0.0.0-development"
+    "hubot": ">= 14 || 0.0.0-development",
+    "google-auth-library": ">= 9"
+  },
+  "peerDependenciesMeta": {
+    "google-auth-library": {
+      "optional": true
+    }
   },
   "release": {
     "branches": [
