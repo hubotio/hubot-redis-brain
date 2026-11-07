@@ -86,22 +86,65 @@ export default (robot, redis = Redis) => {
 
   robot.brain.setAutoSave(false)
 
-  const getData = () => {
-    client.get(`${prefix}:storage`).then((reply) => {
-      if (reply) {
-        robot.logger.info(`hubot-redis-brain: Data for ${prefix} brain retrieved from Redis`)
-        robot.brain.mergeData(JSON.parse(reply.toString()))
-        robot.brain.emit('connected')
-      } else {
-        robot.logger.info(`hubot-redis-brain: Initializing new data for ${prefix} brain`)
-        robot.brain.mergeData({})
-        robot.brain.emit('connected')
+  const getData = async () => {
+    // Migrate legacy single-blob storage to hash format
+    const legacy = await client.get(`${prefix}:storage`)
+    if (legacy) {
+      robot.logger.info(`hubot-redis-brain: Migrating legacy storage to hash format for ${prefix} brain`)
+      const legacyData = JSON.parse(legacy.toString())
+
+      if (legacyData.users && Object.keys(legacyData.users).length > 0) {
+        const pipeline = client.multi()
+        for (const [id, user] of Object.entries(legacyData.users)) {
+          pipeline.hSet(`${prefix}:users`, id, JSON.stringify(user))
+        }
+        await pipeline.exec()
       }
 
-      robot.brain.setAutoSave(true)
-    }).catch(err => {
-      robot.logger.error(`hubot-redis-brain: Unable to get data from Redis: ${err}`)
-    })
+      if (legacyData._private && Object.keys(legacyData._private).length > 0) {
+        const pipeline = client.multi()
+        for (const [key, value] of Object.entries(legacyData._private)) {
+          pipeline.hSet(`${prefix}:private`, key, JSON.stringify(value))
+        }
+        await pipeline.exec()
+      }
+
+      await client.del(`${prefix}:storage`)
+      robot.logger.info(`hubot-redis-brain: Migration complete for ${prefix} brain`)
+    }
+
+    const [rawUsers, rawPrivate] = await Promise.all([
+      client.hGetAll(`${prefix}:users`),
+      client.hGetAll(`${prefix}:private`)
+    ])
+
+    const data = { users: {}, _private: {} }
+
+    for (const [id, userData] of Object.entries(rawUsers || {})) {
+      try {
+        data.users[id] = JSON.parse(userData)
+      } catch (err) {
+        robot.logger.error(`hubot-redis-brain: Error parsing user ${id}: ${err}`)
+      }
+    }
+
+    for (const [key, value] of Object.entries(rawPrivate || {})) {
+      try {
+        data._private[key] = JSON.parse(value)
+      } catch (err) {
+        robot.logger.error(`hubot-redis-brain: Error parsing key ${key}: ${err}`)
+      }
+    }
+
+    if (legacy || Object.keys(rawUsers || {}).length > 0 || Object.keys(rawPrivate || {}).length > 0) {
+      robot.logger.info(`hubot-redis-brain: Data for ${prefix} brain retrieved from Redis`)
+    } else {
+      robot.logger.info(`hubot-redis-brain: Initializing new data for ${prefix} brain`)
+    }
+
+    robot.brain.mergeData(data)
+    robot.brain.emit('connected')
+    robot.brain.setAutoSave(true)
   }
 
   if (info.auth) {
@@ -111,7 +154,7 @@ export default (robot, redis = Redis) => {
       }
 
       robot.logger.info('hubot-redis-brain: Successfully authenticated to Redis')
-      getData()
+      getData().catch(err => robot.logger.error(`hubot-redis-brain: Unable to load data from Redis: ${err}`))
     })
   }
 
@@ -123,14 +166,34 @@ export default (robot, redis = Redis) => {
 
   client.on('connect', function () {
     robot.logger.debug('hubot-redis-brain: Successfully connected to Redis')
-    if (!info.auth) { getData() }
+    if (!info.auth) { getData().catch(err => robot.logger.error(`hubot-redis-brain: Unable to load data from Redis: ${err}`)) }
   })
 
   robot.brain.on('save', (data) => {
-    if (!data) {
-      data = {}
+    if (!data) return
+
+    const users = data.users || {}
+    const privateData = data._private || {}
+
+    if (Object.keys(users).length > 0) {
+      const pipeline = client.multi()
+      for (const [id, user] of Object.entries(users)) {
+        pipeline.hSet(`${prefix}:users`, id, JSON.stringify(user))
+      }
+      pipeline.exec().catch(err => {
+        robot.logger.error(`hubot-redis-brain: Unable to save users to Redis: ${err}`)
+      })
     }
-    client.set(`${prefix}:storage`, JSON.stringify(data))
+
+    if (Object.keys(privateData).length > 0) {
+      const pipeline = client.multi()
+      for (const [key, value] of Object.entries(privateData)) {
+        pipeline.hSet(`${prefix}:private`, key, JSON.stringify(value))
+      }
+      pipeline.exec().catch(err => {
+        robot.logger.error(`hubot-redis-brain: Unable to save private data to Redis: ${err}`)
+      })
+    }
   })
 
   robot.brain.on('close', () => client.quit())

@@ -12,6 +12,7 @@ class RedisMock extends EventEmitter {
   constructor (delegate) {
     super()
     this.data = {}
+    this.hashes = {}
     this.delegate = delegate
   }
 
@@ -25,8 +26,51 @@ class RedisMock extends EventEmitter {
   }
 
   async set (key, value) {
-    if (this.delegate?.set) return this.delegate.set(key)
+    if (this.delegate?.set) return this.delegate.set(key, value)
     this.data[key] = value
+  }
+
+  async del (key) {
+    if (this.delegate?.del) return this.delegate.del(key)
+    delete this.data[key]
+  }
+
+  async hGet (hash, field) {
+    if (this.delegate?.hGet) return this.delegate.hGet(hash, field)
+    return this.hashes[hash]?.[field]
+  }
+
+  async hSet (hash, field, value) {
+    if (this.delegate?.hSet) return this.delegate.hSet(hash, field, value)
+    if (!this.hashes[hash]) this.hashes[hash] = {}
+    this.hashes[hash][field] = value
+  }
+
+  async hGetAll (hash) {
+    if (this.delegate?.hGetAll) return this.delegate.hGetAll(hash)
+    return this.hashes[hash] || {}
+  }
+
+  async hDel (hash, field) {
+    if (this.delegate?.hDel) return this.delegate.hDel(hash, field)
+    if (this.hashes[hash]) delete this.hashes[hash][field]
+  }
+
+  multi () {
+    const self = this
+    const operations = []
+    const pipeline = {
+      hSet (hash, field, value) {
+        operations.push({ hash, field, value })
+        return pipeline
+      },
+      async exec () {
+        for (const { hash, field, value } of operations) {
+          await self.hSet(hash, field, value)
+        }
+      }
+    }
+    return pipeline
   }
 
   quit () {
@@ -98,12 +142,11 @@ describe('redis-brain', () => {
     const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     const delegate = {
-      data: {},
       async get (key) {
         assert.deepEqual(key, 'prefix-for-redis-key:storage')
         robot.shutdown()
         delete process.env.REDIS_URL
-        return this.data[key]
+        return null
       }
     }
     redisBrain(robot, {
@@ -120,12 +163,11 @@ describe('redis-brain', () => {
     const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     const delegate = {
-      data: {},
       async get (key) {
         assert.deepEqual(key, 'prefix-for-redis-key:storage')
         robot.shutdown()
         delete process.env.REDIS_URL
-        return this.data[key]
+        return null
       }
     }
     redisBrain(robot, {
@@ -142,12 +184,11 @@ describe('redis-brain', () => {
     const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     const delegate = {
-      data: {},
       async get (key) {
         assert.deepEqual(key, 'prefix-for-redis-key:storage')
         robot.shutdown()
         delete process.env.REDIS_URL
-        return this.data[key]
+        return null
       }
     }
     redisBrain(robot, {
@@ -164,12 +205,11 @@ describe('redis-brain', () => {
     const robot = new Robot('Shell', false, 'hubot')
     await robot.loadAdapter()
     const delegate = {
-      data: {},
       async get (key) {
         assert.deepEqual(key, 'prefix-for-redis-key:storage')
         robot.shutdown()
         delete process.env.REDIS_URL
-        return this.data[key]
+        return null
       }
     }
     redisBrain(robot, {
@@ -179,5 +219,42 @@ describe('redis-brain', () => {
       }
     })
     await robot.run()
+  })
+
+  it('Migrates legacy single-blob storage to hash format on startup', async () => {
+    process.env.REDIS_URL = 'redis://localhost:6379'
+    const robot = new Robot('Shell', false, 'hubot')
+    await robot.loadAdapter()
+
+    const legacyData = {
+      users: { U1: { id: 'U1', name: 'Alice' } },
+      _private: { counter: 42 }
+    }
+
+    let deletedKey = null
+    const delegate = {
+      async get (key) {
+        if (key === 'hubot:storage') return JSON.stringify(legacyData)
+        return null
+      },
+      async del (key) {
+        deletedKey = key
+      }
+    }
+
+    const mock = new RedisMock(delegate)
+    redisBrain(robot, { createClient: () => mock })
+
+    await new Promise(resolve => {
+      robot.brain.once('connected', resolve)
+      robot.run()
+    })
+
+    assert.deepEqual(deletedKey, 'hubot:storage')
+    assert.deepEqual(JSON.parse(mock.hashes['hubot:users'].U1), { id: 'U1', name: 'Alice' })
+    assert.deepEqual(JSON.parse(mock.hashes['hubot:private'].counter), 42)
+
+    robot.shutdown()
+    delete process.env.REDIS_URL
   })
 })
